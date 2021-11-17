@@ -1,0 +1,18 @@
+name: build-image
+on: [push]
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        path: microvmgen
+
+    - run: curl https://buildroot.org/downloads/buildroot-2021.11-rc1.tar.bz2 | tar xj
+
+    - name: Build the disk image!
+      working-directory: ./buildroot-2021.11-rc1
+      run: |
+        BR2_EXTERNAL=../microvmgen make microvm_defconfig
+        make -j 24
