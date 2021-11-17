@@ -1,0 +1,4 @@
+[submodule "systemd-enrollement"]
+	path = systemd-enrollement
+	url = https://github.com/vdagonneau-anssi/systemd.git
+	branch = auto-enrollement

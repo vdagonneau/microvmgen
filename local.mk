@@ -1,0 +1,1 @@
+SYSTEMD_OVERRIDE_SRCDIR = "$(BR2_EXTERNAL_MICROVM_PATH)/systemd-enrollement"
