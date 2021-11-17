@@ -16,3 +16,9 @@ jobs:
       run: |
         BR2_EXTERNAL=../microvmgen make microvm_defconfig
         make -j 24
+
+    - name: Upload the result
+      uses: actions/upload-artifact@v2
+      with:
+        name: code-coverage-report
+        path: output/images/disk.img
