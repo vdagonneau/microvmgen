@@ -3,49 +3,39 @@ on: [push]
 jobs:
   build-image:
     runs-on: self-hosted
+    env:
+      BUILDROOT_VERSION: 2021.11-rc1
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
         path: microvmgen
 
-    - name: Downloading buildroot
-      run: curl https://buildroot.org/downloads/buildroot-2021.11-rc1.tar.bz2 | tar xj
-
-    - name: Caching buildroot, no need to hammer their servers
-      uses: actions/cache@v2
-      with:
-        key: buildroot-dl
-        path: ./buildroot-2021.11-rc1
-
-    - name: Start by building just the toolchain
-      working-directory: ./buildroot-2021.11-rc1
-      run: |
-        BR2_EXTERNAL=../microvmgen make microvm_defconfig
-        make -j 2 toolchain
-
-    - name: Caching the host toolchain (might be a very bad idea)
-      uses: actions/cache@v2
-      with:
-        key: buildroot-toolchain
-        path: ./buildroot-2021.11-rc1/output/host
-
-    - name: Build the disk image!
-      working-directory: ./buildroot-2021.11-rc1
-      run: |
-        make -j$(nproc)
-
-    - name: Caching the download cache (should be fine) and the ccache (might cause problems)
+    - id: cache
+      name: Caching the download cache (should be fine), the ccache (might cause problems) as well as the host toolchain (might be a very bad idea)
       uses: actions/cache@v2
       with:
         key: buildroot-cache
         path: |
-          ./buildroot-2021.11-rc1/cache/dl
-          ./buildroot-2021.11-rc1/cache/ccache
+          buildroot/cache/dl
+          buildroot/cache/ccache
+          buildroot/output/host
+
+    - uses: actions/checkout@v2
+      with:
+        repository: buildroot/buildroot
+        path: buildroot
+        ref: ${{ env.BUILDROOT_VERSION }}
+
+    - name: Build all the things!
+      working-directory: buildroot
+      run: |
+        BR2_EXTERNAL=../microvmgen make microvm_defconfig
+        make -j$(nproc)
 
     - name: Upload the result
       uses: actions/upload-artifact@v2
       with:
         name: final-disk-image
-        path: ./buildroot-2021.11-rc1/output/images/disk.img
+        path: ./buildroot/output/images/disk.img
         if-no-files-found: error
