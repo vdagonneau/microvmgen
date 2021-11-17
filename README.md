@@ -6,7 +6,9 @@ This project allows you to generate a disk image for a minimal system based on t
 
 It was originally created to experiment with buildroot and secure boot with systemd.
 
-## Getting started
+## Getting started, with lots of compiling
+
+If you do not want to be compiling for hours, you can also try the precompiled image: [the easy way](#getting-started-the-easy-way).
 
 ```shell
 # We'll start by cloning this repo
@@ -26,11 +28,24 @@ make -j 24
 
 ```
 
+You can now jump straight to to [Running the generated image](#running-the-generated-image).
+
+## Getting started, the easy way
+
+Download the latest release in the 'Releases' section on the right, unzip it in a folder and then jump to [Running the generated image](#running-the-generated-image).
+
 ## Running the generated image
 
 In order to run the generated image you will need a UEFI firmware image as well as a pre-initialized UEFI NVRAM image.
 
 Both these files are generally available on most Linux distros in a package called edk2-ovmf. As the NVRAM image is going to be written to by the virtual machine, it needs to be copied before being used.
 
+```shell
 cp /usr/share/OVMF/OVMF_VARS_4M.fd OVMF_VARS_4M.fd
-qemu-system-x86_64 -machine type=pc-q35-6.0,accel=kvm -smp 2 -nographic -serial mon:stdio -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.secboot.fd -drive if=pflash,format=raw,file=OVMF_VARS_4M.fd -drive file=output/images/disk.img,if=virtio,format=raw
+
+qemu-system-x86_64 -machine type=pc-q35-6.0,accel=kvm -smp 2 \
+  -nographic -serial mon:stdio \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.secboot.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_4M.fd \
+	-drive file=output/images/disk.img,if=virtio,format=raw
+```

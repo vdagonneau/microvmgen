@@ -48,3 +48,4 @@ jobs:
       with:
         name: final-disk-image
         path: ./buildroot-2021.11-rc1/output/images/disk.img
+        if-no-files-found: error
